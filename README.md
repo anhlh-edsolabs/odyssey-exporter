@@ -98,6 +98,7 @@ python main.py <COLLECTION_ID> [OPTIONS]
 
 - `-o, --output <FILENAME>`: (Optional) The name of the output file, without the file extension. Defaults to `tokens`.
 - `-f, --format <FORMAT>`: (Optional) The format of the output file. Choose between `json` or `csv`. Defaults to `json`.
+- `-v, --verbose`: (Optional) Include all ownership history for each token. By default, only the most recent ownership record is included.
 
 ### Examples
 
