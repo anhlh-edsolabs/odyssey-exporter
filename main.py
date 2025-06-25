@@ -22,13 +22,24 @@ retries = Retry(total=5, backoff_factor=1,
                 status_forcelist=[429, 500, 502, 503, 504])
 session.mount("https://", HTTPAdapter(max_retries=retries))
 
+request_headers = {
+    "Content-Type": "application/json",
+    # "Authorization": "Bearer 0x1::aptos_coin::AptosCoin",
+    "x-aptos-client-id": "aptos-indexer-client",
+    "x-aptos-client-version": "1.0.0",
+}
+
 # Query Indexer API for tokens in the collection
+
+
 def fetch_tokens_in_collection(collection_id, verbose=False):
     """Fetch tokens in the collection."""
     # First, get the total supply
     try:
-        supply_payload = {"query": COLLECTION_SUPPLY_QUERY, "variables": {"collection_id": collection_id}}
-        response = session.post(INDEXER_URL, json=supply_payload, timeout=10)
+        supply_payload = {"query": COLLECTION_SUPPLY_QUERY,
+                          "variables": {"collection_id": collection_id}}
+        response = session.post(
+            INDEXER_URL, json=supply_payload, timeout=10, headers=request_headers)
         response.raise_for_status()
         data = response.json()
         if "errors" in data or not data.get("data", {}).get("current_collections_v2"):
@@ -37,7 +48,8 @@ def fetch_tokens_in_collection(collection_id, verbose=False):
             return []
         collection_name = data["data"]["current_collections_v2"][0]["collection_name"]
         token_supply = data["data"]["current_collections_v2"][0]["current_supply"]
-        print(f"Collection {collection_name} has {token_supply} tokens. Start fetching...")
+        print(
+            f"Collection {collection_name} has {token_supply} tokens. Start fetching...")
     except requests.exceptions.RequestException as e:
         print(f"Error fetching collection supply: {e}")
         return []
@@ -54,7 +66,8 @@ def fetch_tokens_in_collection(collection_id, verbose=False):
         }
         payload = {"query": TOKEN_OWNERSHIPS_QUERY, "variables": variables}
         try:
-            response = session.post(INDEXER_URL, json=payload, timeout=10)
+            response = session.post(
+                INDEXER_URL, json=payload, timeout=10, headers=request_headers)
             response.raise_for_status()
             data = response.json()
             if "errors" in data:
@@ -123,6 +136,8 @@ def fetch_tokens_in_collection(collection_id, verbose=False):
     return tokens
 
 # Export to CSV
+
+
 def export_to_csv(tokens, filename):
     """Export to CSV"""
     try:
@@ -150,6 +165,8 @@ def export_to_json(tokens, filename):
         print(f"Error exporting to JSON: {e}")
 
 # Main execution
+
+
 def main():
     """Main execution"""
     parser = argparse.ArgumentParser(
